@@ -50,7 +50,7 @@ static void gpio_init(uint8_t pin)
     GLB_GPIO_Init(&cfg);
 }
 
-static int32_t pwm_init(uint8_t id, uint32_t freq)
+static int32_t pwm_init(uint8_t id, uint32_t freq, uint16_t div)
 {
     PWM_CH_CFG_Type pwmCfg = {
         .ch = PWM_CH0,
@@ -63,13 +63,16 @@ static int32_t pwm_init(uint8_t id, uint32_t freq)
         .threshold2 = 0,
         .intPulseCnt = 0,
     };
-
+#if 0
     /* 2k ~ 800K */
     if ((freq < 2000) || (freq > 800000)) {
         return -1;
     }
+#endif
+    if (div == 0) div = 1;
 
-    pwmCfg.period = BL_PWM_CLK/freq;
+    pwmCfg.clkDiv = div;
+    pwmCfg.period = BL_PWM_CLK/div/freq;
     pwmCfg.ch = id;
 
     PWM_Channel_Disable(id);
@@ -78,21 +81,21 @@ static int32_t pwm_init(uint8_t id, uint32_t freq)
     return 0;
 }
 
-int32_t bl_pwm_init(uint8_t id, uint8_t pin, uint32_t freq)
+int32_t bl_pwm_init(uint8_t id, uint8_t pin, uint32_t freq, uint16_t div)
 {
     if (GLB_GPIO_PIN_MAX <= pin) {
         return -1;
     }
-
+#if 0
     /* 2k ~ 800K */
     if ((freq < 2000) || (freq > 800000)) {
         blog_error("arg error. bl_pwm_init freq = %ld\r\n", freq);
         return -1;
     }
-
+#endif
     /* init gpio */
     gpio_init(pin);
-    pwm_init(id, freq);
+    pwm_init(id, freq, div);
 
     return 0;
 }
@@ -109,11 +112,12 @@ int32_t bl_pwm_stop(uint8_t id)
     return 0;
 }
 
-int32_t bl_pwm_set_freq(uint8_t id, uint32_t freq)
+int32_t bl_pwm_set_freq(uint8_t id, uint32_t freq, uint16_t div)
 {
     PWM_Channel_Disable(id);
 
-    uint16_t period = BL_PWM_CLK/freq;
+    if (div == 0) div = 1;
+    uint16_t period = BL_PWM_CLK/div/freq;
     uint16_t threshold1 = 0;
     uint16_t threshold2 = 0;
 

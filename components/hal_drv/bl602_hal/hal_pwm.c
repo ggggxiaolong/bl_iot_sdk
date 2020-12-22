@@ -251,7 +251,7 @@ static void fdt_pwm_module_init(const void *fdt, int pwm_offset)
 
         log_info("path = %s, id = %d, pin = %d, freq = %ld\r\n",
                 path, id, pin, freq);
-        bl_pwm_init(id, pin, freq);
+        bl_pwm_init(id, pin, freq, 1);
         if (dev_pwm_init(id, (const char *)path) != 0) {
             log_error("dev_pwm_init err.\r\n");
         }
@@ -298,7 +298,7 @@ int32_t hal_pwm_set_duty_bydev(pwm_dev_t *pwm, float duty)
 int32_t hal_pwm_set_freq_bydev(pwm_dev_t *pwm, uint32_t freq)
 {
     log_error("not support.\r\n");
-    bl_pwm_set_freq(pwm->port, freq);
+    bl_pwm_set_freq(pwm->port, freq, 1);
     return 0;
 }
 
@@ -476,7 +476,7 @@ int hal_pwm_freq_update(uint8_t id, uint32_t freq)
         return -1;
     }
     __g_pwm_dev[id].freq = freq;
-    bl_pwm_set_freq(id, freq);
+    bl_pwm_set_freq(id, freq, 1);
     bl_pwm_set_duty(id, __g_pwm_dev[id].now_duty);
     return 0;
 }
@@ -493,7 +493,7 @@ int hal_pwm_init(uint8_t id, int pin)
     __g_pwm_dev[id].freq = 2000;
 
     utils_list_init(&__g_pwm_dev[id].list_head);
-    bl_pwm_init(id, pin, __g_pwm_dev[id].freq);
+    bl_pwm_init(id, pin, __g_pwm_dev[id].freq, 1);
 
     if (!__g_init_flag) {
         __g_init_flag = 1;

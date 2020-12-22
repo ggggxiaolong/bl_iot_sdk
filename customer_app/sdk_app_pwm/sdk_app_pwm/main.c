@@ -139,7 +139,7 @@ void cmd_pwm_init(char *buf, int len, int argc, char **argv)
     id = atoi(argv[1]);
     pin = atoi(argv[2]);
 
-    bl_pwm_init(id, pin, 6000000);
+    bl_pwm_init(id, pin, 50, 100);
 }
 
 void cmd_pwm_start(char *buf, int len, int argc, char **argv)
@@ -199,15 +199,16 @@ void cmd_pwm_task(char *buf, int len, int argc, char **argv)
 
 void cmd_pwm_test(char *buf, int len, int argc, char **argv)
 {
-    uint8_t pin = 0;
-    uint8_t id = 0;
+    uint8_t pin = 2;
+    uint8_t id = 2;
     int i;
 
-    bl_pwm_init(id, pin, 60000);
-    bl_pwm_set_duty(id, 50);
+    bl_pwm_init(id, pin, 50, 100);
+    bl_pwm_set_duty(id, 0);
 
     for (i = 0; i < 10; i++) {
         log_info("start pin = %d, id = %d\r\n", id, pin);
+        bl_pwm_set_duty(id, i*8);
         bl_pwm_start(id);
         aos_msleep(2000);
 
